@@ -7,8 +7,9 @@ replace github.com/fluxcd/notification-controller/api => ./api
 require (
 	code.gitea.io/sdk/gitea v0.15.1
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230106234847-43070de90fa1
-	github.com/Azure/azure-amqp-common-go/v4 v4.0.0
-	github.com/Azure/azure-event-hubs-go/v3 v3.4.0
+	github.com/Azure/azure-amqp-common-go/v4 v4.2.0
+	github.com/Azure/azure-event-hubs-go/v3 v3.6.0
+	github.com/DataDog/datadog-api-client-go/v2 v2.14.0
 	github.com/containrrr/shoutrrr v0.7.1
 	github.com/fluxcd/notification-controller/api v0.33.0
 	github.com/fluxcd/pkg/apis/event v0.4.1
@@ -54,6 +55,7 @@ require (
 	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
+	github.com/DataDog/zstd v1.5.2 // indirect
 	github.com/MakeNowJust/heredoc v1.0.0 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230217124315-7d5c6f04bbb8 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
