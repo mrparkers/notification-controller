@@ -302,6 +302,8 @@ spec:
                 - alertmanager
                 - grafana
                 - githubdispatch
+                - pagerduty
+                - datadog
                 type: string
               username:
                 description: Username specifies the name under which events are posted.
