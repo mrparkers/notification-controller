@@ -106,9 +106,9 @@ func toDataDogEvent(event eventv1.Event) datadogV1.EventCreateRequest {
 		Title: fmt.Sprintf("%s/%s.%s", strings.ToLower(event.InvolvedObject.Kind), event.InvolvedObject.Name, event.InvolvedObject.Namespace),
 		Text:  event.Message,
 		Tags: []string{
-			"source:fluxcd",
 			fmt.Sprintf("controller:%s", event.ReportingController),
 		},
-		DateHappened: int64Ptr(event.Timestamp.Unix()),
+		SourceTypeName: strPtr("fluxcd"),
+		DateHappened:   int64Ptr(event.Timestamp.Unix()),
 	}
 }
