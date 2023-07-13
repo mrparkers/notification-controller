@@ -49,6 +49,10 @@ func NewDataDog(address string, proxyUrl string, certPool *x509.CertPool, apiKey
 		conf.Host = baseUrl.Host
 	}
 
+	if apiKey == "" {
+		return nil, fmt.Errorf("token cannot be empty")
+	}
+
 	if proxyUrl != "" || certPool != nil {
 		transport := &http.Transport{}
 
