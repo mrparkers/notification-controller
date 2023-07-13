@@ -87,7 +87,7 @@ func NewDataDog(address string, proxyUrl string, certPool *x509.CertPool, apiKey
 }
 
 func (d *DataDog) Post(ctx context.Context, event eventv1.Event) error {
-	dataDogEvent := toDataDogEvent(event)
+	dataDogEvent := toDataDogEvent(&event)
 
 	_, _, err := d.eventsApi.CreateEvent(d.dataDogCtx(ctx), dataDogEvent)
 	if err != nil {
@@ -105,7 +105,7 @@ func (d *DataDog) dataDogCtx(ctx context.Context) context.Context {
 	})
 }
 
-func toDataDogEvent(event eventv1.Event) datadogV1.EventCreateRequest {
+func toDataDogEvent(event *eventv1.Event) datadogV1.EventCreateRequest {
 	return datadogV1.EventCreateRequest{
 		Title: fmt.Sprintf("%s/%s.%s", strings.ToLower(event.InvolvedObject.Kind), event.InvolvedObject.Name, event.InvolvedObject.Namespace),
 		Text:  event.Message,
@@ -114,5 +114,18 @@ func toDataDogEvent(event eventv1.Event) datadogV1.EventCreateRequest {
 		},
 		SourceTypeName: strPtr("fluxcd"),
 		DateHappened:   int64Ptr(event.Timestamp.Unix()),
+		AlertType:      toDataDogAlertType(event),
 	}
+}
+
+func toDataDogAlertType(event *eventv1.Event) *datadogV1.EventAlertType {
+	if event.Severity == eventv1.EventSeverityError {
+		return dataDogEventAlertTypePtr(datadogV1.EVENTALERTTYPE_ERROR)
+	}
+
+	return dataDogEventAlertTypePtr(datadogV1.EVENTALERTTYPE_INFO)
+}
+
+func dataDogEventAlertTypePtr(t datadogV1.EventAlertType) *datadogV1.EventAlertType {
+	return &t
 }
