@@ -265,6 +265,7 @@ func (s *EventServer) handleEvent() func(w http.ResponseWriter, r *http.Request)
 			}
 
 			go func(n notifier.Interface, e eventv1.Event) {
+				s.logger.Info("sending notification")
 				ctx, cancel := context.WithTimeout(context.Background(), provider.GetTimeout())
 				defer cancel()
 				if err := n.Post(ctx, e); err != nil {
