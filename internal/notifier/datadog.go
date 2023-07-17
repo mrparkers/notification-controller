@@ -18,11 +18,8 @@ package notifier
 
 import (
 	"context"
-	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
@@ -40,41 +37,41 @@ type DataDog struct {
 func NewDataDog(address string, proxyUrl string, certPool *x509.CertPool, apiKey string) (*DataDog, error) {
 	conf := datadog.NewConfiguration()
 
-	if address != "" {
-		baseUrl, err := url.Parse(address)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse address %q: %w", address, err)
-		}
-
-		conf.Host = baseUrl.Host
-	}
+	//if address != "" {
+	//	baseUrl, err := url.Parse(address)
+	//	if err != nil {
+	//		return nil, fmt.Errorf("failed to parse address %q: %w", address, err)
+	//	}
+	//
+	//	conf.Host = baseUrl.Host
+	//}
 
 	if apiKey == "" {
 		return nil, fmt.Errorf("token cannot be empty")
 	}
 
-	if proxyUrl != "" || certPool != nil {
-		transport := &http.Transport{}
-
-		if proxyUrl != "" {
-			proxy, err := url.Parse(proxyUrl)
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse proxy URL %q: %w", proxyUrl, err)
-			}
-
-			transport.Proxy = http.ProxyURL(proxy)
-		}
-
-		if certPool != nil {
-			transport.TLSClientConfig = &tls.Config{
-				RootCAs: certPool,
-			}
-		}
-
-		conf.HTTPClient = &http.Client{
-			Transport: transport,
-		}
-	}
+	//if proxyUrl != "" || certPool != nil {
+	//	transport := &http.Transport{}
+	//
+	//	if proxyUrl != "" {
+	//		proxy, err := url.Parse(proxyUrl)
+	//		if err != nil {
+	//			return nil, fmt.Errorf("failed to parse proxy URL %q: %w", proxyUrl, err)
+	//		}
+	//
+	//		transport.Proxy = http.ProxyURL(proxy)
+	//	}
+	//
+	//	if certPool != nil {
+	//		transport.TLSClientConfig = &tls.Config{
+	//			RootCAs: certPool,
+	//		}
+	//	}
+	//
+	//	conf.HTTPClient = &http.Client{
+	//		Transport: transport,
+	//	}
+	//}
 
 	apiClient := datadog.NewAPIClient(conf)
 	eventsApi := datadogV1.NewEventsApi(apiClient)
