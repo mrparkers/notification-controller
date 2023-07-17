@@ -87,6 +87,8 @@ func NewDataDog(address string, proxyUrl string, certPool *x509.CertPool, apiKey
 }
 
 func (d *DataDog) Post(ctx context.Context, event eventv1.Event) error {
+	fmt.Printf("token: %s\n", d.apiKey)
+
 	dataDogEvent := toDataDogEvent(&event)
 
 	_, _, err := d.eventsApi.CreateEvent(d.dataDogCtx(ctx), dataDogEvent)
