@@ -110,7 +110,7 @@ func (f Factory) Notifier(provider string) (Interface, error) {
 	case apiv1.GrafanaProvider:
 		n, err = NewGrafana(f.URL, f.ProxyURL, f.Token, f.CertPool, f.Username, f.Password)
 	case apiv1.DataDogProvider:
-		n, err = NewDataDog(f.URL, f.ProxyURL, f.CertPool, f.Token)
+		n, err = NewDataDog(f.URL, f.ProxyURL, f.CertPool, f.Token, f.Channel)
 	default:
 		err = fmt.Errorf("provider %s not supported", provider)
 	}

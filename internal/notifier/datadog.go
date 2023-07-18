@@ -38,11 +38,20 @@ type DataDog struct {
 	env       string
 }
 
-func NewDataDog(env string, proxyUrl string, certPool *x509.CertPool, apiKey string) (*DataDog, error) {
+func NewDataDog(address string, proxyUrl string, certPool *x509.CertPool, apiKey string, env string) (*DataDog, error) {
 	conf := datadog.NewConfiguration()
 
 	if apiKey == "" {
 		return nil, fmt.Errorf("token cannot be empty")
+	}
+
+	if address != "" {
+		baseUrl, err := url.Parse(address)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse address %q: %w", address, err)
+		}
+
+		conf.Host = baseUrl.Host
 	}
 
 	if proxyUrl != "" || certPool != nil {
