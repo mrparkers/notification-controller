@@ -117,6 +117,10 @@ func (d *DataDog) toDataDogEvent(event *eventv1.Event) datadogV1.EventCreateRequ
 			fmt.Sprintf("controller:%s", event.ReportingController),
 			fmt.Sprintf("env:%s", d.env),
 			fmt.Sprintf("kube_cluster_name:%s", d.env),
+			// add tags to reference involved object
+			fmt.Sprintf("kind:%s", strings.ToLower(event.InvolvedObject.Kind)),
+			fmt.Sprintf("name:%s", event.InvolvedObject.Name),
+			fmt.Sprintf("namespace:%s", event.InvolvedObject.Namespace),
 		},
 		SourceTypeName: strPtr("fluxcd"),
 		DateHappened:   int64Ptr(event.Timestamp.Unix()),
