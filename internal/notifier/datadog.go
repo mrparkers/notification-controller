@@ -18,8 +18,11 @@ package notifier
 
 import (
 	"context"
+	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
@@ -32,46 +35,38 @@ type DataDog struct {
 	apiClient *datadog.APIClient
 	eventsApi *datadogV1.EventsApi
 	apiKey    string
+	env       string
 }
 
-func NewDataDog(address string, proxyUrl string, certPool *x509.CertPool, apiKey string) (*DataDog, error) {
+func NewDataDog(env string, proxyUrl string, certPool *x509.CertPool, apiKey string) (*DataDog, error) {
 	conf := datadog.NewConfiguration()
-
-	//if address != "" {
-	//	baseUrl, err := url.Parse(address)
-	//	if err != nil {
-	//		return nil, fmt.Errorf("failed to parse address %q: %w", address, err)
-	//	}
-	//
-	//	conf.Host = baseUrl.Host
-	//}
 
 	if apiKey == "" {
 		return nil, fmt.Errorf("token cannot be empty")
 	}
 
-	//if proxyUrl != "" || certPool != nil {
-	//	transport := &http.Transport{}
-	//
-	//	if proxyUrl != "" {
-	//		proxy, err := url.Parse(proxyUrl)
-	//		if err != nil {
-	//			return nil, fmt.Errorf("failed to parse proxy URL %q: %w", proxyUrl, err)
-	//		}
-	//
-	//		transport.Proxy = http.ProxyURL(proxy)
-	//	}
-	//
-	//	if certPool != nil {
-	//		transport.TLSClientConfig = &tls.Config{
-	//			RootCAs: certPool,
-	//		}
-	//	}
-	//
-	//	conf.HTTPClient = &http.Client{
-	//		Transport: transport,
-	//	}
-	//}
+	if proxyUrl != "" || certPool != nil {
+		transport := &http.Transport{}
+
+		if proxyUrl != "" {
+			proxy, err := url.Parse(proxyUrl)
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse proxy URL %q: %w", proxyUrl, err)
+			}
+
+			transport.Proxy = http.ProxyURL(proxy)
+		}
+
+		if certPool != nil {
+			transport.TLSClientConfig = &tls.Config{
+				RootCAs: certPool,
+			}
+		}
+
+		conf.HTTPClient = &http.Client{
+			Transport: transport,
+		}
+	}
 
 	apiClient := datadog.NewAPIClient(conf)
 	eventsApi := datadogV1.NewEventsApi(apiClient)
@@ -80,13 +75,14 @@ func NewDataDog(address string, proxyUrl string, certPool *x509.CertPool, apiKey
 		apiClient,
 		eventsApi,
 		apiKey,
+		env,
 	}, nil
 }
 
 func (d *DataDog) Post(ctx context.Context, event eventv1.Event) error {
 	fmt.Printf("token: %s\n", d.apiKey)
 
-	dataDogEvent := toDataDogEvent(&event)
+	dataDogEvent := d.toDataDogEvent(&event)
 
 	_, _, err := d.eventsApi.CreateEvent(d.dataDogCtx(ctx), dataDogEvent)
 	if err != nil {
@@ -104,12 +100,13 @@ func (d *DataDog) dataDogCtx(ctx context.Context) context.Context {
 	})
 }
 
-func toDataDogEvent(event *eventv1.Event) datadogV1.EventCreateRequest {
+func (d *DataDog) toDataDogEvent(event *eventv1.Event) datadogV1.EventCreateRequest {
 	return datadogV1.EventCreateRequest{
 		Title: fmt.Sprintf("%s/%s.%s", strings.ToLower(event.InvolvedObject.Kind), event.InvolvedObject.Name, event.InvolvedObject.Namespace),
 		Text:  event.Message,
 		Tags: []string{
 			fmt.Sprintf("controller:%s", event.ReportingController),
+			fmt.Sprintf("env:%s", d.env),
 		},
 		SourceTypeName: strPtr("fluxcd"),
 		DateHappened:   int64Ptr(event.Timestamp.Unix()),
